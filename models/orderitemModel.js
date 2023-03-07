@@ -16,6 +16,18 @@ module.exports =  (sequalize, DataTypes) =>{
         price:{
             type:DataTypes.DECIMAL,
             allowNull:true
+        },
+        strength:{
+            type:DataTypes.STRING,
+        },
+        category:{
+            type:DataTypes.STRING,
+        },
+        genericname:{
+            type:DataTypes.STRING,
+        },
+        company:{
+            type:DataTypes.STRING,
         }
 
     })

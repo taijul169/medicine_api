@@ -42,9 +42,9 @@ db.products = require('./productModel.js')(sequelize, DataTypes)
 db.reviews = require('./reviewModel.js')(sequelize, DataTypes)
 db.users = require('./userModel.js')(sequelize,DataTypes)
 db.orders = require('./orderModel.js')(sequelize,DataTypes)
-db.paymentdetails = require('./paymentdetailsModel.js')(sequelize,DataTypes)
+// db.paymentdetails = require('./paymentdetailsModel.js')(sequelize,DataTypes)
 db.orderitems = require('./orderitemModel.js')(sequelize,DataTypes)
-db.productinventorys = require('./productinventoryModel.js')(sequelize,DataTypes)
+db.shippingaddress = require('./shippingaddressModel.js')(sequelize,DataTypes)
 db.productimages = require('./productimageModel.js')(sequelize,DataTypes)
 db.admins = require('./adminModel.js')(sequelize,DataTypes)
 
@@ -55,10 +55,21 @@ db.sequelize.sync({
     console.log("yes re-sync done!")
 })
 
+// one to one relationship between shipping address and order
+
+db.orders.hasOne(db.shippingaddress,{
+    foreignKey:'order_id',
+    as:'shippingaddress'
+})
+
+db.shippingaddress.belongsTo(db.orders,
+    {
+        foreignKey:'order_id',
+        as:'order'
+    })
 
 
 // 1 to many Relation
-
 
 db.products.hasMany(db.reviews,{
     foreignKey:'product_id',
@@ -107,15 +118,15 @@ db.productimages.belongsTo(db.products,
         as:'product'
     })
 // payment and order relationship
-db.orders.hasMany(db.paymentdetails,{
-    foreignKey:'order_id',
-    as:'paymentdetails'
-})
+// db.orders.hasMany(db.paymentdetails,{
+//     foreignKey:'order_id',
+//     as:'paymentdetails'
+// })
 
-db.paymentdetails.belongsTo(db.orders,{
-    foreignKey:'order_id',
-    as:'order'
-})
+// db.paymentdetails.belongsTo(db.orders,{
+//     foreignKey:'order_id',
+//     as:'order'
+// })
 
 
 module.exports = db

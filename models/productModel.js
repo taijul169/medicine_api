@@ -20,7 +20,16 @@ module.exports =  (sequalize, DataTypes) =>{
         },
         category:{
             type:DataTypes.STRING,
-            allowNull:false
+            
+        },
+        strength:{
+            type:DataTypes.STRING, 
+        },
+        genericname:{
+            type:DataTypes.STRING, 
+        },
+        company:{
+            type:DataTypes.STRING, 
         },
         image:{
             type:DataTypes.STRING

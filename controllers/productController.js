@@ -15,26 +15,34 @@ const path =  require('path')
 // 1. create product
 
 const addProduct = async (req,res)=>{
-
-    if(!req.file || !req.body.price  || !req.body.stock || !req.body.category){
-        res.status(StatusCodes.BAD_REQUEST).json({ 
-            msg:"Please Provide all values"
-         })
+    try {
+        if(!req.file || !req.body.price  || !req.body.stock || !req.body.category){
+            res.status(StatusCodes.BAD_REQUEST).json({ 
+                msg:"Please Provide all values"
+             })
+        }
+        let info ={
+            image:req.file.path,
+            name:req.body.name,
+            price:req.body.price,
+            stock:req.body.stock,
+            description:req.body.description,
+            category:req.body.category,
+            strength:req.body.strength,
+            genericname:req.body.genericname,
+            company:req.body.company,
+            published:req.body.published ? req.body.published :false,
+        }
+        const product = await Product.create(info)
+        res.status(StatusCodes.CREATED).json({product})
+    
+        console.log(product)
+    } catch (error) {
+        console.log("error",error)
+        res.status(StatusCodes.BAD_REQUEST).json({error})
     }
-    let info ={
-        image:req.file.path,
-        name:req.body.name,
-        price:req.body.price,
-        stock:req.body.stock,
-        description:req.body.description,
-        category:req.body.category,
-        published:req.body.published ? req.body.published :false,
-    }
-  
-    const product = await Product.create(info)
-    res.status(StatusCodes.CREATED).json({product})
 
-    console.log(product)
+    
 }
 
 // add product slide photos
@@ -102,8 +110,6 @@ const getOneProduct = async (req,res) =>{
 
 const updateProduct = async (req,res) =>{
     let id = req.params.id
-    console.log("req.body:",req.body)
-    console.log("req.body:",id)
     if(!req.body.price  || !req.body.stock || !req.body.category){
         res.status(StatusCodes.BAD_REQUEST).json({ 
             msg:"Please Provide all values"
@@ -153,11 +159,6 @@ const getPublishedProduct = async (req,res) =>{
         
      return  product.image  = `${req.protocol+"://"+req.headers.host}${product.image}`
    })
-//    for(var i=0;i< data.recordset.length;i++){
-//     data.recordset[i].Photo = `${req.protocol+"://"+req.headers.host}${data.recordset[i].Photo}`
-//   }
-   
-
    res.status(200).send(products)
 
 }

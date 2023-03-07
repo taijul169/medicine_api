@@ -11,18 +11,11 @@ module.exports =  (sequalize, DataTypes) =>{
         },
         payment_id:{
             type:DataTypes.INTEGER,
-            allowNull:false
-        },
-        shipping_address_id:{
-            type: DataTypes.STRING,
-            allowNull:true
         },
         status:{
-            type:DataTypes.BOOLEAN,
-            defaultValue: 1,
+            type:DataTypes.STRING,
+            defaultValue: 'Pending',
         }
-
-
     })
     
     return Order;

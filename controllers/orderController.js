@@ -5,34 +5,43 @@ const {StatusCodes} = require('http-status-codes');
 const User =db.users
 const Order =db.orders
 const Orderitems =  db.orderitems;
-const Paymentdetails =  db.paymentdetails;
+const Shippingaddress =  db.shippingaddress;
 
 
 const checkout =  async (req,res,next)=>{
-    // const cart =[
+    try {
+         // const cart =[
     //     {id: 1,amount:5 ,name: 'poultry chicken', price: 220, stock: 15, description: 'this is latest product description'},
     //     {id: 2,amount:5 ,name: 'poultry fish', price: 450, stock: 15, description: 'this is latest product description'}
     // ]
-    const {user_id,total,payment_id,shipping_address_id,cart} = req.body
-    const order  =  await Order.create({user_id,total,payment_id,shipping_address_id})
+    const {user_id,total,cart,paymentmethod,name,phone,region,city,area,address,note} = req.body
+    const order  =  await Order.create({user_id,total,paymentmethod})
     
     if(order){
         cart.map((item,index)=>{
             Orderitems.create(
                 {
                     order_id:order.id,
-                    product_id:item.id,
-                    quantity:item.amount,
+                    product_id:item.product_id,
+                    quantity:item.quantity,
                     price:item.price,
+                    strength:item.strength,
+                    category:item.category,
+                    genericname:item.genericname,
+                    company:item.company,
 
                 }
              )
              return item;
         })
-        const paymentdetails =  Paymentdetails.create({user_id:user_id,order_id:order.id,amount:order.total,provider:1,payment_method:'cash'})
+        const shippingaddress = await Shippingaddress.create({name:name,order_id:order.id,phone:phone,region:region,city:city,area:area,note:note,address:address})
      
-        res.status(StatusCodes.CREATED).json({order,paymentdetails})
+        res.status(StatusCodes.CREATED).json({order,shippingaddress})
     }
+    } catch (error) {
+        res.status(StatusCodes.BAD_REQUEST).json({error})
+    }
+   
 
 }
 
@@ -43,8 +52,8 @@ const getSingleorder =  async (req,res,next) =>{
         model:User,
         as:'user'
     },{
-        model:Paymentdetails,
-        as:'paymentdetails',
+        model:Shippingaddress,
+        as:'shippingaddress',
     },
     {
         model:Orderitems,
