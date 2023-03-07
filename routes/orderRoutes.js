@@ -8,11 +8,12 @@ const router =  express.Router()
 //     max:10,
 //     message:'Too many requests from this IP address,please try again after 15 minutes'
 // })
-const { checkout,getSingleorder,getOrderlistbyuserid}  = require('../controllers/orderController') 
+const { checkout,getSingleorder,getOrderlistbyuserid,getallorders}  = require('../controllers/orderController') 
 const  authenticateUser =  require('../middleware/auth') 
 router.route('/checkout').post(checkout)
 router.route('/order/:id').get(getSingleorder)
 router.route('/userid/:user_id').get(getOrderlistbyuserid)
+router.route('/getallorders').get(getallorders)
 
 
 

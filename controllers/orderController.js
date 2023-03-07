@@ -79,7 +79,17 @@ const getOrderlistbyuserid = async (req,res,next) =>{
     
    
 }
-
+const getallorders = async (req,res)=>{
+    try {
+        
+        const orders =  await Order.findAll()
+        if(orders){
+            res.status(StatusCodes.OK).send(orders)
+        }
+    } catch (error) {
+        res.status(StatusCodes.BAD_REQUEST).json({msg:error.data.msg})
+    }
+}
 
 
 
@@ -157,4 +167,4 @@ const updateUser = async( req,res) =>{
     res.send('update user')
 }
 
-module.exports = { checkout,getSingleorder ,getOrderlistbyuserid}
+module.exports = { checkout,getSingleorder ,getOrderlistbyuserid,getallorders}
