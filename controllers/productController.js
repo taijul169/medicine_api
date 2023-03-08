@@ -31,7 +31,7 @@ const addProduct = async (req,res)=>{
             strength:req.body.strength,
             genericname:req.body.genericname,
             company:req.body.company,
-            published:req.body.published ? req.body.published :false,
+            published:req.body.published ? req.body.published :true,
         }
         const product = await Product.create(info)
         res.status(StatusCodes.CREATED).json({product})
@@ -84,7 +84,7 @@ const getAllProducts = async (req,res) =>{
 
 // 3 get single product
 
-const getOneProduct = async (req,res) =>{
+const getOneProductOLD = async (req,res) =>{
 
     let id = req.params.id
     let product =  await Product.findOne({include:[{
@@ -106,6 +106,15 @@ const getOneProduct = async (req,res) =>{
     
 }
 
+const getOneProduct = async (req,res) =>{
+
+    let id = req.params.id
+    let product =  await Product.findOne({where:{id:id}})
+    product.image = `${req.protocol+"://"+req.headers.host}/${product.image}`
+    res.status(200).send(product)
+
+    
+}
 // 4 single product update
 
 const updateProduct = async (req,res) =>{
@@ -123,7 +132,9 @@ const updateProduct = async (req,res) =>{
             stock:req.body.stock,
             description:req.body.description,
             category:req.body.category,
-            published:req.body.published ? req.body.published :false,
+            strength:req.body.strength,
+            genericname:req.body.genericname,
+            company:req.body.company,
         }
         const product = await Product.update(info,{where:{id:id}})
         res.status(200).send(product)
@@ -136,6 +147,18 @@ const updateProduct = async (req,res) =>{
     }
     
 }
+// single shop update online/offline status
+const updateProuductStatus = async (req,res) =>{
+    let id = req.params.id;
+    let status = req.params.status;
+    const productstatus = await Product.update(
+            {
+                published:status
+            },{where:{id:id}})
+     console.log("productstatus status update:",productstatus)      
+     res.status(200).send(productstatus)
+ 
+   } 
 
 // 5 delete product by id
 
@@ -240,7 +263,8 @@ module.exports ={
     getProuductReviews,
     upload,
     slide_photo,
-    addProductImage
+    addProductImage,
+    updateProuductStatus
 
     
 }

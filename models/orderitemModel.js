@@ -6,8 +6,11 @@ module.exports =  (sequalize, DataTypes) =>{
             allowNull:false
         },
         product_id:{
-            type:DataTypes.STRING,
+            type:DataTypes.INTEGER,
             allowNull:false
+        },
+        name:{
+            type:DataTypes.STRING,
         },
         quantity:{
             type:DataTypes.DECIMAL,

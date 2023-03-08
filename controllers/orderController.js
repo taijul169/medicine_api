@@ -6,7 +6,8 @@ const User =db.users
 const Order =db.orders
 const Orderitems =  db.orderitems;
 const Shippingaddress =  db.shippingaddress;
-
+const { Op } = require('sequelize');
+const Sequelize =  require('sequelize')
 
 const checkout =  async (req,res,next)=>{
     try {
@@ -25,6 +26,7 @@ const checkout =  async (req,res,next)=>{
                     product_id:item.product_id,
                     quantity:item.quantity,
                     price:item.price,
+                    name:item.name,
                     strength:item.strength,
                     category:item.category,
                     genericname:item.genericname,
@@ -48,7 +50,7 @@ const checkout =  async (req,res,next)=>{
 // get single order by order id
 const getSingleorder =  async (req,res,next) =>{
     const id =  req.params.id;
-    const order =  await Order.findOne({include:[{
+    let order =  await Order.findOne({include:[{
         model:User,
         as:'user'
     },{
@@ -58,9 +60,10 @@ const getSingleorder =  async (req,res,next) =>{
     {
         model:Orderitems,
         as:'orderitem',
+        
     }
 ], where:{id:id}})
-
+   
     res.status(StatusCodes.OK).json({order})
 }
 
@@ -82,7 +85,11 @@ const getOrderlistbyuserid = async (req,res,next) =>{
 const getallorders = async (req,res)=>{
     try {
         
-        const orders =  await Order.findAll()
+        const orders =  await Order.findAll({
+            order: [
+                ['id', 'DESC'],
+            ],
+        })
         if(orders){
             res.status(StatusCodes.OK).send(orders)
         }
@@ -91,80 +98,135 @@ const getallorders = async (req,res)=>{
     }
 }
 
-
-
-
-
-// register user functionality-------------------------------------
-const register = async( req,res, next) =>{
-        const {firstname, email, password,lastname,phone,gender,dateofbirth,address } = req.body
-
-        if(!firstname || !phone  || !password){
-            res.status(StatusCodes.BAD_REQUEST).json({ 
-                msg:"Please Provide all values"
-             })
+const getallordersbystatus = async (req,res)=>{
+    try {
+        
+        const orders =  await Order.findAll({
+            where:{status:req.params.status},
+            order: [
+                ['id', 'DESC'],
+            ],
+        })
+        if(orders){
+            res.status(StatusCodes.OK).send(orders)
         }
-        if(phone.length !=11){
-            res.status(StatusCodes.BAD_REQUEST).json({ 
-                msg:"Invalid Phone Number"
-             })
-        }
-        const userAlreadyExists  = await User.findOne({where:{phone:phone}})
-        if(userAlreadyExists){
-            res.status(StatusCodes.BAD_REQUEST).json({ 
-               msg:"User already exist!!"
-            })
-        }
-        const user =  await  User.create({firstname, email, password,lastname,phone,gender,dateofbirth,address })
-
-        const token =   user.createJWT()
-        res.status(StatusCodes.CREATED).json({user,token})
+    } catch (error) {
+        res.status(StatusCodes.BAD_REQUEST).json({msg:error.data.msg})
+    }
 }
 
-
-// loging functionality--------------------------------------------
-const login = async( req,res) =>{
-    const {phone,password }  = req.body;
-    if(!phone || !password){
-        res.status(StatusCodes.BAD_REQUEST).json({ 
-            msg:"Please Provide all values"
-      })
+// order status update
+const orderstatusupdate = async (req,res)=>{
+    try {
+        
+        const order =  await Order.update({status:req.params.status},{where:{id:req.params.id}})
+        res.status(200).send(order)
+    } catch (error) {
+        res.status(StatusCodes.BAD_REQUEST).json({msg:error})
     }
-    const user  = await User.findOne({where:{phone,password}})
-    if(!user){
-        res.status(StatusCodes.BAD_REQUEST).json({ 
-            msg:"Invalid Credentials"
-      })
-      
-    }
-    // const isPasswordCorrect  =  await user.comparePassword(password)
-    // if(!isPasswordCorrect){
-    //     throw new UnAuthenticatedError('Invalid Credentials')
-    // }
-    const token = user.createJWT()
-    user.password = undefined
-    res.status(StatusCodes.OK).json({user,token})
 }
 
+const getallCustomers = async (req,res) =>{
+    try {
+        let data = await Order.findAll({
+           attributes:['user_id'],
+           include:[
+            {
+                model:User,
+                as:'user',
+                
+            
+            },
+            
+        ],
+        })
+        const key = 'user_id';
 
-// update user functionality----------------------------------------------
-const updateUser = async( req,res) =>{
-
-    const {email, name, lastName, location} = req.body
-    if(!email || !name || !lastName || !location){
-        throw new  BadRequestError('Please provide all values')
+        const arrayUniqueByKey = [...new Map(data.map(item =>
+          [item[key], item])).values()];
+        
+        //console.log(arrayUniqueByKey);
+        arrayUniqueByKey.map((item,idx)=>{
+              item.user.image  = `${req.protocol+"://"+req.headers.host}/${item.user.image}`
+        })
+        res.status(200).send(arrayUniqueByKey)
+    } catch (error) {
+        console.log("error",error)
     }
-    const user  = await  User.findOne({_id:req.user.userId})
-    user.email =  email
-    user.name =  name
-    user.lastName =  lastName
-    user.location =  location
 
-    await user.save()
-    const token = user.createJWT()
+}
+
+// single customer order history with customer info
+const getallorderbycustomerid = async (req,res) =>{
+    try {
+        let id = req.params.id;
+        let data = await User.findOne({
+           where: { id:id },
+           include:[
+            {
+                model:Order,
+                as:'order',
+                where:{user_id:id},
+                attributes:['id','createdAt','status'],
+                required:false,
+               
+            },
+          ],
+          
+        })
+        data.image = `${req.protocol+"://"+req.headers.host}/${data.image}`
+        res.status(200).send(data)
+    } catch (error) {
+        res.status(404).send({msg:'Not found'})
+    }
+ 
+}
+
+// find best client 
+  const getBestCustomerByadmin = async (req,res)=>{
+       console.log("req.body",req.body)
+       let order =  req.body.by_order
+       let limit =  +(req.body.limit)
+    try {
+        let fromDate  =  new Date(req.body.fromDate)
+        let toDate  =  new Date(req.body.toDate)
+        if(!limit || !order){
+          res.send({msg:"Required Field!"})
+        }
+        let condition = {
+        };
+        
+        if(req.body.status){
+            condition.status=req.body.status;
+        }
+        if(req.body.fromDate && req.body.toDate){
+            condition.createdAt = {[Op.between] : [fromDate, toDate]}
+        }
+
+        let bestShops =  await Order.findAll({
+            attributes:['user_id',[Sequelize.fn('count',Sequelize.col('user_id')),'count'],[Sequelize.fn('sum', Sequelize.col('total')), "total_amount"]],
+            include:[
+                {
+                    model:User,
+                    as:'user',
+                    attributes:['id','firstname','phone','address']
+                }
+            ],
+            group:['order.user_id'],
+            order:Sequelize.literal(`${order} DESC`),
+            where:condition,
+            limit:limit
+        })
+        console.log('bestshop:',bestShops)
+        res.status(200).send(bestShops)
+    } catch (error) {
+        console.log("best customer error",error)
+    }
     
-    res.status(StatusCodes.OK).json({user,token, location:user.location})
-    res.send('update user')
 }
 
-module.exports = { checkout,getSingleorder ,getOrderlistbyuserid,getallorders}
+
+
+
+
+module.exports = { checkout,getSingleorder ,getOrderlistbyuserid,getallorders,getallordersbystatus,orderstatusupdate,getallCustomers,getallorderbycustomerid,getBestCustomerByadmin}

@@ -5,7 +5,7 @@ const dotenv =  require("dotenv")
 const bodyParser =  require('body-parser')
 dotenv.config() 
 var corOptions ={
-    origin:"http://localhost:3000"
+    origin:"http://localhost:5050"
 }
 
 

@@ -8,6 +8,7 @@ const Auth = require('../middleware/auth')
  router.get('/published', productController.getPublishedProduct)
  router.get('/singleproduct/:id', productController.getOneProduct)
  router.put('/updateproduct/:id',productController.upload, productController.updateProduct)
+ router.put('/updateproductstatus/:id/:status', productController.updateProuductStatus)
  router.delete('/deleteproduct/:id', productController.deleteProduct)
 // adding product image
 router.post('/addproductimage',productController.slide_photo,productController.addProductImage)
