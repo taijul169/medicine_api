@@ -1,7 +1,7 @@
 const jwt  =  require('jsonwebtoken')
 
 module.exports =  (sequalize, DataTypes) =>{
-    const Admin = sequalize.define('admn',{
+    const Admin = sequalize.define('admin',{
         firstname:{
             type:DataTypes.STRING,
             allowNull:true
@@ -45,6 +45,9 @@ module.exports =  (sequalize, DataTypes) =>{
         role:{
             type:DataTypes.STRING,
             defaultValue:'SUPER_ADMIN',
+        },
+        jwtoken:{
+            type:DataTypes.TEXT
         }
 
 

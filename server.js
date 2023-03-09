@@ -22,9 +22,11 @@ const authantication = require('./middleware/auth.js')
 const router = require('./routes/productRouter.js')
 const authrouter = require('./routes/authRoutes.js')
 const orderrouter = require('./routes/orderRoutes.js')
+const authadmin = require('./routes/authadminRoutes.js')
 app.use('/api/products', router)
 app.use('/api/auth',authrouter)
 app.use('/api/order',orderrouter)
+app.use('/api/admin',authadmin)
 
 // static image folder
 app.use('/Images',express.static('./Images'))

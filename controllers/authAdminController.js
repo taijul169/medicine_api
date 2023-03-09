@@ -33,26 +33,33 @@ const register = async( req,res, next) =>{
 
 // loging functionality--------------------------------------------
 const login = async( req,res) =>{
-    const {phone,password }  = req.body;
-    if(!phone || !password){
-        res.status(StatusCodes.BAD_REQUEST).json({ 
-            msg:"Please Provide all values"
-      })
+    try {
+        const {email,password }  = req.body;
+        console.log("req body:",req.body)
+        if(!email || !password){
+            res.status(StatusCodes.BAD_REQUEST).json({ 
+                msg:"Please Provide all values"
+          })
+        }
+        const admin  = await Admin.findOne({where:{email,password}})
+        if(!admin){
+            res.status(StatusCodes.BAD_REQUEST).json({ 
+                msg:"Invalid Credentials"
+          })
+          
+        }
+        // const isPasswordCorrect  =  await admin.comparePassword(password)
+        // if(!isPasswordCorrect){
+        //     throw new UnAuthenticatedError('Invalid Credentials')
+        // }
+        const token = admin.createJWT()
+        admin.password = undefined
+        res.status(StatusCodes.OK).json({admin,token})
+    } catch (error) {
+        res.send(error)
+        console.log("error",error)
     }
-    const admin  = await Admin.findOne({where:{phone,password}})
-    if(!admin){
-        res.status(StatusCodes.BAD_REQUEST).json({ 
-            msg:"Invalid Credentials"
-      })
-      
-    }
-    // const isPasswordCorrect  =  await admin.comparePassword(password)
-    // if(!isPasswordCorrect){
-    //     throw new UnAuthenticatedError('Invalid Credentials')
-    // }
-    const token = admin.createJWT()
-    admin.password = undefined
-    res.status(StatusCodes.OK).json({admin,token})
+ 
 }
 
 
