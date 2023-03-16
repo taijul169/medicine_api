@@ -8,11 +8,12 @@ const router =  express.Router()
 //     max:10,
 //     message:'Too many requests from this IP address,please try again after 15 minutes'
 // })
-const { register, login,updateUser}  = require('../controllers/authAdminController') 
+const { register, login,updateadmin,authenticateAdmin,upload}  = require('../controllers/authAdminController') 
 const  authenticateUser =  require('../middleware/auth') 
 
 router.route('/register').post(register);
 router.route('/login').post(login);
-router.route('/updateUser').patch(authenticateUser, updateUser);
+router.route('/updateUser/:id').put(upload,updateadmin);
+router.route('/adminauthenticate').post(authenticateAdmin);
 module.exports =  router
 

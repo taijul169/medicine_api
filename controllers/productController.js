@@ -3,8 +3,10 @@ const {StatusCodes} = require('http-status-codes')
 // create main Model
 
 const Product =db.products
-const Review = db.reviews
-const Productimage =  db.productimages
+const Discountitem = db.discountitems
+const Discount = db.discounts
+// const Review = db.reviews
+// const Productimage =  db.productimages
 
 // image upload
 const multer  = require('multer')
@@ -71,13 +73,31 @@ const addProductImage =  async (req,res)=>{
 // 2 get all products
 
 const getAllProducts = async (req,res) =>{
-    let products =  await Product.findAll({
-     
-    })
-    for(var i=0;i< products.length;i++){
-        products[i].image = `${req.protocol+"://"+req.headers.host}/${products[i].image}`
+    try {
+        let products =  await Product.findAll({
+            include:[
+                {
+                    model:Discountitem,
+                    as:'discountitem',
+                    required:false,
+                    include:[{
+                        model:Discount,
+                        as:'discount',
+                        attributes:['id','discount_percent','isactive']
+                    }],
+                    attributes:['id','isactive']
+
+                },
+            ]
+        })
+        for(var i=0;i< products.length;i++){
+            products[i].image = `${req.protocol+"://"+req.headers.host}/${products[i].image}`
+        }
+         res.status(200).send(products)
+    } catch (error) {
+        res.status(200).send(error)
     }
-     res.status(200).send(products)
+   
 
    
 }
@@ -176,7 +196,15 @@ const getPublishedProduct = async (req,res) =>{
 
    
    let products =  await Product.findAll({
-       where:{published:true}
+       where:{published:true},
+       include:[
+        {
+            model:Discountitem,
+            as:'discountitem',
+            required:false
+        },
+
+]
    })
     products =   products.map((product, key)=>{
         
@@ -249,8 +277,6 @@ const slide_photo = multer({
         cb('Give proper files formate to upload')
     }
 }).array('images',3)
-
-
 
 
 module.exports ={

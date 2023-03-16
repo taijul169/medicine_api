@@ -23,10 +23,12 @@ const router = require('./routes/productRouter.js')
 const authrouter = require('./routes/authRoutes.js')
 const orderrouter = require('./routes/orderRoutes.js')
 const authadmin = require('./routes/authadminRoutes.js')
+const discountrouter = require('./routes/discountRoutes')
 app.use('/api/products', router)
 app.use('/api/auth',authrouter)
 app.use('/api/order',orderrouter)
 app.use('/api/admin',authadmin)
+app.use('/api/discount',discountrouter)
 
 // static image folder
 app.use('/Images',express.static('./Images'))

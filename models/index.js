@@ -47,6 +47,8 @@ db.orderitems = require('./orderitemModel.js')(sequelize,DataTypes)
 db.shippingaddress = require('./shippingaddressModel.js')(sequelize,DataTypes)
 db.productimages = require('./productimageModel.js')(sequelize,DataTypes)
 db.admins = require('./adminModel.js')(sequelize,DataTypes)
+db.discounts  = require('./discountModel.js')(sequelize,DataTypes)
+db.discountitems  = require('./discountitemModel.js')(sequelize,DataTypes)
 
 db.sequelize.sync({
     force:false
@@ -127,6 +129,31 @@ db.productimages.belongsTo(db.products,
 //     foreignKey:'order_id',
 //     as:'order'
 // })
+
+// one to many relation between product and discount
+db.discounts.hasMany(db.discountitems,{
+    foreignKey:'discount_id',
+    as:'discountitem'
+})
+
+db.discountitems.belongsTo(db.discounts,
+    {
+        foreignKey:'discount_id',
+        as:'discount'
+ })
+
+//  one to many relationship between discountitem and products
+ db.discountitems.belongsTo(db.products,{
+    foreignKey:'product_id',
+    as:'product'
+})
+
+db.products.hasMany(db.discountitems,
+    {
+        foreignKey:'product_id',
+        as:'discountitem'
+ })
+
 
 
 module.exports = db

@@ -1,8 +1,31 @@
-
+const multer = require("multer");
 // const User =  require('../models/userModel')
 const db =  require('../models')
 const {StatusCodes} = require('http-status-codes')
 const Admin =db.admins
+
+
+// upload image controller
+const storage =  multer.diskStorage({
+ 
+    destination:function(req,file,cb){
+        if(file){
+            cb(null,'Images');
+        }   
+    },
+    filename: function(req,file,cb){
+        if(file){
+            cb(null, new Date().toISOString().replace(/:/g, '-') + file.originalname);
+        }
+        
+    }
+})
+
+const upload  =  multer({
+    storage:storage,
+    limits:{fileSize:'1000000'}
+}).single('image')
+
 
 // register Admin functionality-------------------------------------
 const register = async( req,res, next) =>{
@@ -52,7 +75,11 @@ const login = async( req,res) =>{
         // if(!isPasswordCorrect){
         //     throw new UnAuthenticatedError('Invalid Credentials')
         // }
+
+       
         const token = admin.createJWT()
+        const tokenset =  await Admin.update({jwtoken :token},{where:{id:admin.id}})
+        admin.jwtoken = token
         admin.password = undefined
         res.status(StatusCodes.OK).json({admin,token})
     } catch (error) {
@@ -64,23 +91,63 @@ const login = async( req,res) =>{
 
 
 // update user functionality----------------------------------------------
-const updateUser = async( req,res) =>{
-
-    const {email, name, lastName, location} = req.body
-    if(!email || !name || !lastName || !location){
-        throw new  BadRequestError('Please provide all values')
+//4 single Shop update
+const updateadmin = async (req,res) =>{
+    try {
+        let id = req.params.id;
+        if(req.file){
+         console.log("req.file",req.file)
+         const admin = await Admin.update(
+             {
+                 firstname:req.body.firstname,
+                 lastname:req.body.lastname,
+                 phone:req.body.phone,
+                 address:req.body.address,
+                 email:req.body.email,
+                 gender:req.body.gender,
+                 dateofbirth:req.body.dateofbirth,
+                 role:req.body.role,
+                 password:req.body.password,
+                 image:req.file.path
+             },{where:{id:id}})
+            res.status(200).send(admin)
+            console.log(admin)
+     }
+     else{
+     
+     const admin = await Admin.update({
+                 firstname:req.body.firstname,
+                 lastname:req.body.lastname,
+                 phone:req.body.phone,
+                 address:req.body.address,
+                 email:req.body.email,
+                 gender:req.body.gender,
+                 dateofbirth:req.body.dateofbirth,
+                 role:req.body.role,
+                 password:req.body.password
+         },{where:{id:id}})
+         res.status(200).send(admin)
+         console.log("admin",admin)
+       }
+    } catch (error) {
+        console.log("error",error)
     }
-    const user  = await  User.findOne({_id:req.user.userId})
-    user.email =  email
-    user.name =  name
-    user.lastName =  lastName
-    user.location =  location
 
-    await user.save()
-    const token = user.createJWT()
     
-    res.status(StatusCodes.OK).json({user,token, location:user.location})
-    res.send('update user')
 }
 
-module.exports = { register, login, updateUser }
+const authenticateAdmin =  async (req,res)=>{
+    try {
+        console.log("token",req.body.token)
+        const AdminData =  await Admin.findOne({where: {jwtoken:`${req.body.token}`}})
+        if(AdminData){
+            AdminData.image = `${req.protocol+"://"+req.headers.host}/${AdminData.image}`
+        }
+        res.status(200).send(AdminData)
+    } catch (error) {
+        console.log(error)
+        res.status(404).send({error})
+    }
+   
+}
+module.exports = { register, login, updateadmin,authenticateAdmin ,upload}
