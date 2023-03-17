@@ -225,8 +225,17 @@ const getallorderbycustomerid = async (req,res) =>{
     
 }
 
+// getallordersbydate
+const getallordersbydate = async(req,res)=>{
+    const currentdate = new Date();
+   const Orders =  await Order.findAll({where:{
+        createdAt: currentdate
+    }})
+
+    res.status(200).send(Orders)
+
+}
 
 
 
-
-module.exports = { checkout,getSingleorder ,getOrderlistbyuserid,getallorders,getallordersbystatus,orderstatusupdate,getallCustomers,getallorderbycustomerid,getBestCustomerByadmin}
+module.exports = { checkout,getSingleorder ,getOrderlistbyuserid,getallorders,getallordersbystatus,orderstatusupdate,getallCustomers,getallorderbycustomerid,getBestCustomerByadmin,getallordersbydate}
