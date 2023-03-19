@@ -6,8 +6,9 @@ const User =db.users
 const Order =db.orders
 const Orderitems =  db.orderitems;
 const Shippingaddress =  db.shippingaddress;
-const { Op } = require('sequelize');
+const { Op, where } = require('sequelize');
 const Sequelize =  require('sequelize')
+const Product =  db.products
 
 const checkout =  async (req,res,next)=>{
     try {
@@ -36,9 +37,14 @@ const checkout =  async (req,res,next)=>{
              )
              return item;
         })
+        cart.map(async(item,index)=>{
+          const a= await Product.findOne({where:{id:item.product_id}})
+           let newstock = a.stock - item.quantity
+              Product.update({stock:newstock},{where:{id:item.product_id}})
+        })
         const shippingaddress = await Shippingaddress.create({name:name,order_id:order.id,phone:phone,region:region,city:city,area:area,note:note,address:address})
      
-        res.status(StatusCodes.CREATED).json({order,shippingaddress})
+        res.status(StatusCodes.CREATED).json({order,shippingaddress,code:200,msg:'success'})
     }
     } catch (error) {
         res.status(StatusCodes.BAD_REQUEST).json({error})
@@ -68,7 +74,6 @@ const getSingleorder =  async (req,res,next) =>{
 }
 
 // get order list by user id
-
 const getOrderlistbyuserid = async (req,res,next) =>{
     try {
         const user_id = req.params.user_id;
@@ -227,11 +232,16 @@ const getallorderbycustomerid = async (req,res) =>{
 
 // getallordersbydate
 const getallordersbydate = async(req,res)=>{
-    const currentdate = new Date();
+    const date = new Date();
+    let day = date.getDate();
+    let month = date.getMonth() + 1;
+    let year = date.getFullYear();
+    // This arrangement can be altered based on how we want the date's format to appear.
+    let currentDate = `${day}-${month}-${year}`;
+    
    const Orders =  await Order.findAll({where:{
-        createdAt: currentdate
+       createdDate:currentDate
     }})
-
     res.status(200).send(Orders)
 
 }

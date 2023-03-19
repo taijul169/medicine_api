@@ -49,6 +49,7 @@ db.productimages = require('./productimageModel.js')(sequelize,DataTypes)
 db.admins = require('./adminModel.js')(sequelize,DataTypes)
 db.discounts  = require('./discountModel.js')(sequelize,DataTypes)
 db.discountitems  = require('./discountitemModel.js')(sequelize,DataTypes)
+db.codes =  require('./codeModel')(sequelize,DataTypes)
 
 db.sequelize.sync({
     force:false

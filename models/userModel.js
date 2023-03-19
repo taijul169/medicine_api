@@ -12,7 +12,6 @@ module.exports =  (sequalize, DataTypes) =>{
         },
         email:{
             type:DataTypes.STRING,
-            allowNull:false
         },
         gender:{
             type: DataTypes.STRING,
@@ -40,7 +39,6 @@ module.exports =  (sequalize, DataTypes) =>{
         },
         password:{
             type:DataTypes.STRING,
-            allowNull:false
         }
 
 

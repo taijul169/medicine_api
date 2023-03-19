@@ -10,19 +10,20 @@ let year = date.getFullYear();
 let currentDate = `${day}-${month}-${year}`;
 //console.log(currentDate); // "17-6-2022"
 
-
+// 6digit random number generate
+const sec_code =Math.floor(100000 + Math.random() * 900000)
 module.exports =  (sequalize, DataTypes) =>{
-    const Order = sequalize.define('order',{
-        user_id:{
-            type:DataTypes.INTEGER,
+    const Code = sequalize.define('code',{
+        phone:{
+            type:DataTypes.STRING,
             allowNull:false
         },
-        total:{
+        code:{
             type:DataTypes.DECIMAL,
-            allowNull:false
+            defaultValue:sec_code
         },
-        payment_id:{
-            type:DataTypes.INTEGER,
+        name:{
+            type:DataTypes.STRING,
         },
         status:{
             type:DataTypes.STRING,
@@ -34,7 +35,7 @@ module.exports =  (sequalize, DataTypes) =>{
         }
     })
     
-    return Order;
+    return Code;
     
 }
 
